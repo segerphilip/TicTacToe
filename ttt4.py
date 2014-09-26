@@ -54,27 +54,25 @@ def has_win (board):
 def done (board):
     return (has_win(board) or '.' not in board)
 
-
 def print_board (board):
     for i in range(4):
         print '',board[i*4],'|',board[i*4+1],'|',board[i*4+2],'|',board[i*4+3]
         print '-'*15*(i!=3)
-    print
 
 def read_player_input (board, player):
-    # FIX ME
-    #
-    # Read player input when playing as 'player' (either 'X' or 'O')
-    # Return a move (a tuple (x,y) with each position between 1 and 4)
-    return None
+    move = int(raw_input('Make your move, {} (0-15): '.format(player)))
+    if board[move] != '.':
+        print 'Invalid move'
+        return read_player_input(board, player)
+    tuple_mve = (move % 4 + 1, move / 4 + 1)
+    return tuple_mve
 
 def make_move (board,move,player):
-    # FIX ME
-    #
-    # Returns a board where 'move' has been performed on 'board' by 
-    #    'player'
-    # Change can be done in place in 'board' or a new copy created
-    return None
+    x,y = move
+    copy_brd = board[:]
+    index = (x-1) + 4*(y-1)
+    copy_brd[index] = player
+    return copy_brd
 
 def computer_move (board,player):
     # FIX ME
