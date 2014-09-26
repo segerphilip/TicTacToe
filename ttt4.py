@@ -16,18 +16,9 @@ def fail (msg):
     raise StandardError(msg)
 
 
-def create_board (str):
-    # FIX ME
-    #
-    # Take a description of the board as input and create the board
-    #  in your representation
-    #
-    # The string description is a sequence of 16 characters,
-    #   each either X or O, or . to represent a free space
-    # It is allowed to pass in a string describing a board
-    #   that would never arise in legal play starting from an empty
-    #   board
-    return None
+def create_board (s):
+    board = list(s)
+    return board
 
 def has_mark (board,x,y):
     # FIX ME
@@ -36,7 +27,10 @@ def has_mark (board,x,y):
     #    position x, y (each between 1 and 4)
     # Return 'X' or 'O' if there is a mark
     # Return False if there is not
-    return None
+    index = (x-1) + 4*(y-1)
+    if board[index] == '.':
+        return False
+    return board[index]
 
 def has_win (board):
     # FIX ME
@@ -57,7 +51,10 @@ def print_board (board):
     # FIX ME
     #
     # Display a board on the console
-    return None
+    for i in range(4):
+        print '',board[i*4],'|',board[i*4+1],'|',board[i*4+2],'|',board[i*4+3]
+        print '-'*15*(i!=3)
+    print
 
 def read_player_input (board, player):
     # FIX ME
@@ -124,14 +121,17 @@ PLAYER_MAP = {
 
 if __name__ == '__main__':
 
-  try:
-      str = sys.argv[1] if len(sys.argv)>1 else '.' * 16
-      player = sys.argv[2] if len(sys.argv)>3 else 'X'
-      playX = PLAYER_MAP[sys.argv[3]] if len(sys.argv)>3 else read_player_input
-      playO = PLAYER_MAP[sys.argv[4]] if len(sys.argv)>4 else computer_move
-  except:
-    print 'Usage: %s [starting board] [X|O] [human|computer] [human|computer]' % (sys.argv[0])
-    exit(1)
-  run(str,player,playX,playO)
+    try:
+        str = sys.argv[1] if len(sys.argv)>1 else '.' * 16
+        if len(str) != 16:
+            print 'Your board is the wrong length'
+            exit(1)
+        player = sys.argv[2] if len(sys.argv)>3 else 'X'
+        playX = PLAYER_MAP[sys.argv[3]] if len(sys.argv)>3 else read_player_input
+        playO = PLAYER_MAP[sys.argv[4]] if len(sys.argv)>4 else computer_move
+    except:
+        print 'Usage: %s [starting board] [X|O] [human|computer] [human|computer]' % (sys.argv[0])
+        exit(1)
+    run(str,player,playX,playO)
 
 
