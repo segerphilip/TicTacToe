@@ -8,6 +8,8 @@
 #
 # A simple strategy game, an extension of the standard 3x3 tic-tac-toe
 #
+# Devs: Jacob Kingery
+#       Philip Seger
 
 import sys
 
@@ -21,36 +23,39 @@ def create_board (s):
     return board
 
 def has_mark (board,x,y):
-    # FIX ME
-    #
-    # Take a board representation and checks if there's a mark at
-    #    position x, y (each between 1 and 4)
-    # Return 'X' or 'O' if there is a mark
-    # Return False if there is not
     index = (x-1) + 4*(y-1)
     if board[index] == '.':
         return False
     return board[index]
 
 def has_win (board):
-    # FIX ME
-    # 
-    # Check if a board is a win for X or for O.
-    # Return 'X' if it is a win for X, 'O' if it is a win for O,
-    # and False otherwise
-    return None
+    win_sequences = [
+                    [0,1,2,3],
+                    [4,5,6,7],
+                    [8,9,10,11],
+                    [12,13,14,15],
+                    [0,4,8,12],
+                    [1,5,9,13],
+                    [2,6,10,14],
+                    [3,7,11,15],
+                    [0,5,10,15],
+                    [3,6,9,12]
+                    ]
+
+    mark_value = {'O':1, '.':0, 'X':10}
+    for positions in win_sequences:
+        s = sum(mark_value[board[pos]] for pos in positions)
+        if s == 4:
+            return 'O'
+        if s == 40:
+            return 'X'
+    return False
 
 def done (board):
-    # FIX ME
-    #
-    # Check if the board is done, either because it is a win or a draw
-    return True
+    return (has_win(board) or '.' not in board)
 
 
 def print_board (board):
-    # FIX ME
-    #
-    # Display a board on the console
     for i in range(4):
         print '',board[i*4],'|',board[i*4+1],'|',board[i*4+2],'|',board[i*4+3]
         print '-'*15*(i!=3)
