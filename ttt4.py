@@ -13,10 +13,8 @@
 
 import sys
 
-
 def fail (msg):
     raise StandardError(msg)
-
 
 def create_board (s):
     board = list(s)
@@ -64,34 +62,71 @@ def read_player_input (board, player):
     if board[move] != '.':
         print 'Invalid move'
         return read_player_input(board, player)
-    tuple_mve = (move % 4 + 1, move / 4 + 1)
+    tuple_mve = (move%4 + 1, move/4 + 1)
     return tuple_mve
 
-def make_move (board,move,player):
+def make_move (board, move, player):
     x,y = move
     copy_brd = board[:]
     index = (x-1) + 4*(y-1)
     copy_brd[index] = player
     return copy_brd
 
-def computer_move (board,player):
-    # FIX ME
-    #
-    # Select a move for the computer, when playing as 'player' (either 
-    #   'X' or 'O')
-    # Return the selected move (a tuple (x,y) with each position between 
-    #   1 and 4)
-    return None
+def possible_moves (board):
+    return [(i%4 + 1, i/4 + 1) for i, e in enumerate(board) if e == '.']
 
+def utility (board):
+    p = has_win(board)
+    return 0 + (p=='X') - (p=='O')
+
+def min_value (board):
+    if done(board):
+        return utility(board)
+
+    v = 2
+    for move in possible_moves(board):
+        v = min(v, max_value(make_move(board, move, 'O')))
+
+    return v
+
+def max_value (board):
+    if done(board):
+        return utility(board)
+
+    v = -2
+    for move in possible_moves(board):
+        v = max(v, min_value(make_move(board, move, 'X')))
+
+    return v
+
+def computer_move (board, player):
+    vals = []
+    minimax = max_value
+    fun = min
+    if player == 'X':
+        minimax = min_value
+        fun = max
+
+    possibilities = possible_moves(board)
+    for move in possibilities:
+        v = minimax(make_move(board, move, player))
+        vals.append(v)
+        print 'Move {} for player {} as minimax value {}'.format(move, player, v)
+        if fun(vals) == fun((-1, 1)):
+            break
+
+    # print possibilities
+    # print vals
+
+    best = vals.index(fun(vals))
+    return possibilities[best]
 
 def other (player):
     if player == 'X':
         return 'O'
     return 'X'
 
-
 def run (str,player,playX,playO): 
-
     board = create_board(str)
 
     print_board(board)
@@ -116,14 +151,12 @@ def run (str,player,playX,playO):
 def main ():
     run('.' * 16, 'X', read_player_input, computer_move)
 
-
 PLAYER_MAP = {
     'human': read_player_input,
     'computer': computer_move
 }
 
 if __name__ == '__main__':
-
     try:
         str = sys.argv[1] if len(sys.argv)>1 else '.' * 16
         if len(str) != 16:
@@ -136,5 +169,3 @@ if __name__ == '__main__':
         print 'Usage: %s [starting board] [X|O] [human|computer] [human|computer]' % (sys.argv[0])
         exit(1)
     run(str,player,playX,playO)
-
-
