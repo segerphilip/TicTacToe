@@ -80,18 +80,38 @@ def utility (board):
     p = has_win(board)
     return 0 + (p=='X') - (p=='O')
 
-def get_rots (brd):
-	return [brd]
+def rotate_brd (brd):
+    rot_inds = [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3]
+    return [brd[i] for i in rot_inds]
+
+def mirror_brd (brd):
+    mir_inds = [3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12]
+    return [brd[i] for i in mir_inds]
+
+def get_all_equiv (brd):
+    equivs = []
+    tmp_brd = brd[:]
+    for i in range(4):
+        tmp_brd = rotate_brd(tmp_brd)
+        equivs.append(tmp_brd)
+        tmp_brd = mirror_brd(tmp_brd)
+        equivs.append(tmp_brd)
+    return equivs
 
 def cache_or_calc (brd, minimax):
+    equiv_brds = get_all_equiv(brd)
+    for eq_brd in equiv_brds:
+        try:
+            eq_str_brd = ''.join(eq_brd)
+            v = CACHE[eq_str_brd]
+            STATS['cached'] += 1
+            return v
+        except:
+            pass
     str_brd = ''.join(brd)
-    try:
-        v = CACHE[str_brd]
-        STATS['cached'] += 1
-    except:
-        v = minimax(brd)
-        CACHE[str_brd] = v
-        STATS['calced'] += 1
+    v = minimax(brd)
+    CACHE[str_brd] = v
+    STATS['calced'] += 1
     return v
 
 def min_value (board):
