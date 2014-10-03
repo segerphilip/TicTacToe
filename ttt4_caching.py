@@ -12,6 +12,7 @@
 #       Philip Seger
 
 import sys
+import shelve
 
 def fail (msg):
     raise StandardError(msg)
@@ -79,13 +80,28 @@ def utility (board):
     p = has_win(board)
     return 0 + (p=='X') - (p=='O')
 
+def get_rots (brd):
+	return [brd]
+
+def cache_or_calc (brd, minimax):
+    str_brd = ''.join(brd)
+    try:
+        v = CACHE[str_brd]
+        STATS['cached'] += 1
+    except:
+        v = minimax(brd)
+        CACHE[str_brd] = v
+        STATS['calced'] += 1
+    return v
+
 def min_value (board):
     if done(board):
         return utility(board)
 
     v = 2
     for move in possible_moves(board):
-        v = min(v, max_value(make_move(board, move, 'O')))
+        new_brd = make_move(board, move, 'O')
+        v = min(v, cache_or_calc(new_brd, max_value))
 
     return v
 
@@ -95,7 +111,8 @@ def max_value (board):
 
     v = -2
     for move in possible_moves(board):
-        v = max(v, min_value(make_move(board, move, 'X')))
+        new_brd = make_move(board, move, 'X')
+        v = max(v, cache_or_calc(new_brd, min_value))
 
     return v
 
@@ -109,9 +126,12 @@ def computer_move (board, player):
 
     possibilities = possible_moves(board)
     for move in possibilities:
-        v = minimax(make_move(board, move, player))
+        new_brd = make_move(board, move, player)
+
+        v = cache_or_calc(new_brd, minimax)
+
         vals.append(v)
-        print 'Move {} for player {} as minimax value {}'.format(move, player, v)
+        print 'Move {} for player {} has minimax value {}'.format(move, player, v)
         if fun(vals) == fun((-1, 1)):
             break
 
@@ -127,29 +147,42 @@ def other (player):
     return 'X'
 
 def run (initial_brd_str,player,playX,playO): 
-    board = create_board(initial_brd_str)
+    try:
+        board = create_board(initial_brd_str)
 
-    print_board(board)
-
-    while not done(board):
-        if player == 'X':
-            move = playX(board,player)
-        elif player == 'O':
-            move = playO(board,player)
-        else:
-            fail('Unrecognized player '+player)
-        board = make_move(board,move,player)
         print_board(board)
-        player = other(player)
 
-    winner = has_win(board)
-    if winner:
-        print winner,'wins!'
-    else:
-        print 'Draw'
+        while not done(board):
+            if player == 'X':
+                move = playX(board,player)
+            elif player == 'O':
+                move = playO(board,player)
+            else:
+                fail('Unrecognized player '+player)
+            board = make_move(board,move,player)
+            print_board(board)
+            player = other(player)
+
+        winner = has_win(board)
+        if winner:
+            print winner,'wins!'
+        else:
+            print 'Draw'
+    except Exception,e:
+        print e
+    print len(CACHE)
+    CACHE.close()
+    print '{} cached and {} calculated'.format(STATS['cached'], STATS['calced'])
         
 def main ():
     run('.' * 16, 'X', read_player_input, computer_move)
+
+
+CACHE = shelve.open('ttt_cache')
+STATS = {
+    'cached': 0,
+    'calced': 0
+}
 
 PLAYER_MAP = {
     'human': read_player_input,
