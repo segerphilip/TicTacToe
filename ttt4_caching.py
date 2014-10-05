@@ -12,7 +12,6 @@
 #       Philip Seger
 
 import sys
-import shelve
 
 def fail (msg):
     raise StandardError(msg)
@@ -84,17 +83,25 @@ def rotate_brd (brd):
     rot_inds = [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3]
     return [brd[i] for i in rot_inds]
 
-def mirror_brd (brd):
-    mir_inds = [3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12]
-    return [brd[i] for i in mir_inds]
+def mirror_brd (brd, dirc):
+    h_inds = [3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12]
+    v_inds = [12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3]
+    if dirc == 'h':
+        return [brd[i] for i in h_inds]
+    elif dirc == 'v':
+        return [brd[i] for i in v_inds]
+    return brd
 
 def get_all_equiv (brd):
     equivs = []
     tmp_brd = brd[:]
+    mir_dirs = ['v', 'h']
+    mir_ind = 0
     for i in range(4):
         tmp_brd = rotate_brd(tmp_brd)
         equivs.append(tmp_brd)
-        tmp_brd = mirror_brd(tmp_brd)
+        tmp_brd = mirror_brd(tmp_brd, mir_dirs[mir_ind])
+        mir_ind = +(not mir_ind)
         equivs.append(tmp_brd)
     return equivs
 
@@ -155,9 +162,6 @@ def computer_move (board, player):
         if fun(vals) == fun((-1, 1)):
             break
 
-    # print possibilities
-    # print vals
-
     best = vals.index(fun(vals))
     return possibilities[best]
 
@@ -191,14 +195,20 @@ def run (initial_brd_str,player,playX,playO):
     except Exception,e:
         print e
     print len(CACHE)
-    CACHE.close()
     print '{} cached and {} calculated'.format(STATS['cached'], STATS['calced'])
         
 def main ():
     run('.' * 16, 'X', read_player_input, computer_move)
 
+CACHE = {
+    'X...............': 0,
+    '.X..............': 0,
+    '.....X..........': 0,
+    'O...............': 0,
+    '.O..............': 0,
+    '.....O..........': 0
+}
 
-CACHE = shelve.open('ttt_cache')
 STATS = {
     'cached': 0,
     'calced': 0
