@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # 
-
 #
 # Game Programming, Level 2 Project
 #
@@ -10,6 +9,11 @@
 #
 # Devs: Jacob Kingery
 #       Philip Seger
+# 
+# Notes: Project was a good difficulty, length, and scope for time
+# requirements and such. For optimization, we went with caching because 
+# it gave the most significant increase in performance without any 
+# unpythonic code.
 
 import sys
 import graphics as gr
